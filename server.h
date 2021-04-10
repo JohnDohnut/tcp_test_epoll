@@ -10,12 +10,14 @@
 #include <fcntl.h>
 #include <sys/epoll.h>
 #include <errno.h>
+#include <memory.h>
 
+#define MAX_BUFFER_LEN 1024;
 #define MAX_EVENTS 64
 #define MAX_CLIENTS 128
-#define LOCALHOST "172.30.98.249"
-#define port 8000
+#define LOCALHOST "127.0.0.1"
+#define PORT 8000
 
-	
+
 
 #endif

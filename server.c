@@ -21,7 +21,7 @@ int main(int argc, char* argv[]){
 	memset(&server_addr, 0, sizeof(struct sockaddr_in));
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = INADDR_ANY;
-	server_addr.sin_port = htons(port);
+	server_addr.sin_port = htons(PORT);
 	/*** *** set_socket_nonblock() *** ***/
 	int flag;
 	flag = fcntl(server_sock, F_GETFL, 0);
@@ -60,8 +60,11 @@ int main(int argc, char* argv[]){
 	printf("	|@ listening...\n");
 	/*** epoll_init() ***///
 	/*** epoll_handle()***/
+	int INTERVAL = 0;
 	while(1){
-		printf("	|@ main loop\n");
+		sleep(1);
+		
+		printf("	|@ loop interval : %d \n", ++INTERVAL);
 		event_count = epoll_wait(epoll_fd, epoll_events, MAX_EVENTS, 50);
 		printf("	|@ epoll_wait()\n");	
 		if(event_count < 0){
@@ -69,10 +72,10 @@ int main(int argc, char* argv[]){
 			return -5;
 		}
 		else if(event_count == 0){
-			printf("no event\n");
+			printf("	|@ no event\n");
 		}
 		else{
-			printf("event detected\n");		
+			printf("	|@ event detected\n");		
 			for(i=0; i<event_count;i++){
 				if(epoll_events[i].data.fd == server_sock){ /// if server event occurrs, accept();
 						printf("	|@ server_sock EPOLLIN\n");
@@ -81,7 +84,7 @@ int main(int argc, char* argv[]){
 							perror("accept() failed\n");
 							return -6;
 						}
-						else if(client_sock == EAGAIN || EWOULDBLOCK){
+						else if(client_sock == EAGAIN || client_sock == EWOULDBLOCK){
 							printf("	| @ no client to accept\n");
 						}
 						else{
@@ -102,12 +105,15 @@ int main(int argc, char* argv[]){
 								close(server_sock);						
 									return -4;		
 							}
+							printf("	|@ new client no : %d \n",client_sock);
 						
 						}
 							
 				}
 			}
-		}	
+	
+		}
+		printf("\n");	
 	}
 }	
 	
