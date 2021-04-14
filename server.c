@@ -1,5 +1,87 @@
  
 #include "server.h"
+server_t* server_sock_init(){
+	server_t* server = malloc(sizeof(server_t));
+	if(server<0){
+		perror("	|! server init failed...\n");
+		return -1;
+	}
+	memset(server, 0, sizeof(server_t));
+	server->addr_len = sizeof(server->server_addr);
+	return server;
+}
+int server_sock_socket(server_t* server){
+	if(server == NULL){
+		perror("	|! server NULL (socket)\n");
+		return -1;
+	}	
+	if((server->sock = socket(AF_INET, SOCK_STREAM, 0)) < 0){
+		perror("sock failed\n");
+		return -2;
+	}
+	return server->sock;
+
+}
+int server_set_sock_nonblock(server_t* server){
+	flag = fcntl(server->sock, F_GETFL, 0);
+	fcntl(server->sock, F_SETFL, flag|O_NONBLOCK);
+}
+int server_bind(server_t* server){
+	if(server == NULL){
+		perror("	|! server NULL (bind)\n");
+		return -1;
+	}
+	server-> addr.sin_family = AF_INET;
+	server-> addr.sin_addr.s_addr = INADDR_ANY;
+	server-> addr.sin_port = htons(PORT);	
+	return 0;
+}
+int server_listen(server_t* server){
+	if(server == NULL){
+		perror("	|! server NULL (listen)\n");
+		return -1;
+	}
+	if(listen(server->sock, MAX_CLIENTS)<0){
+		perror("	|! server listen failed\n");
+		return -2;
+	}
+	return server->sock;
+}
+
+server_t* server_accept(server_t* server){
+	server_t* client = malloc(sizeof(server_t));
+	client = memset(client, 0, sizeof(server_t));
+	if(server == NULL){
+		perror("	|! server NULL (accept)\n");
+		return -1;
+	}
+	client->sock = accept(server->sock, (struct sockaddr *)(&(client->addr)), &(client->addr_len));
+	if(client-> sock < 0){
+		printf("	|! accept failed\n");
+		free(client);
+		return -2
+	}
+	if(client-> sock == EWOULDBLOCK || client-> sock == EWOULDAGAIN){	
+		printf("	|! nothing to accept\n");
+		free(client);
+		return 0;
+	}
+	if(client-> sock > 0){
+		printf("	|@ accepted client : %d\n",client->sock);
+		return client;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
 
 int main(int argc, char* argv[]){
 	struct sockaddr_in server_addr, client_addr;
@@ -7,18 +89,16 @@ int main(int argc, char* argv[]){
 	int client_sock = -1;
 	socklen_t server_addrlen, client_addrlen;
 	int client_socks[MAX_CLIENTS];
+	memset(client_socks, 0, sizeof(int) * MAX_CLIENTS);
 	int i;
 	client_addrlen = sizeof(client_addr);
 	server_addrlen = sizeof(server_addr);	
 	
-	memset(client_socks, 0, sizeof(int) * MAX_CLIENTS);
+	
 	/*** sock_init() ***/		
-	if((server_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0){
-		perror("sock failed\n");
-		return -1;
-	}
+	server_sock = server_sock_init();
 	printf("	|@ Server Socket : %d\n",server_sock); 
-	memset(&server_addr, 0, sizeof(struct sockaddr_in));
+
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = INADDR_ANY;
 	server_addr.sin_port = htons(PORT);
@@ -102,8 +182,9 @@ int main(int argc, char* argv[]){
 								perror("epoll_ctl failed\n");
 								close(epoll_fd);
 								close(client_sock);
-								close(server_sock);						
-									return -4;		
+								printf("	|! failed to add client event, connection closed\n");
+								continue;
+		
 							}
 							printf("	|@ new client no : %d \n",client_sock);
 						
