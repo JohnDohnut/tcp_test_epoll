@@ -82,5 +82,24 @@ server_t* server_accept(server_t* server){
 
 
 
+<<<<<<< HEAD
+=======
+
+
+
+
+
+
+
+
+
+int main(int argc, char* argv[]){
+
+}	
+	
+	/*** epoll_handle() ***///
+	
+	
+>>>>>>> 0b8dc0398e8bcf02bfa219ae8cf597a67c823a82
 	
  
