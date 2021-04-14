@@ -1,3 +1,5 @@
+#include "server_epoll.h"
+
 epoll_t* server_epoll_init(){
 	epoll_t* epoll = malloc(sizeof(epoll_t));
 	if (epoll < 0){
@@ -6,7 +8,7 @@ epoll_t* server_epoll_init(){
 	}
 	return epoll;
 }
-event_t* server_epoll_event_init(epoll_t* epoll int op){
+event_t* server_epoll_event_init(epoll_t* epoll, int op){
 	if(epoll == NULL){
 		perror("	|! epoll NULL (event_init)\n");
 		return -1;
@@ -45,7 +47,7 @@ int server_epoll_create(epoll_t* epoll, int max){
 		return -1;
 	}
 	epoll->epoll_fd = epoll_create(MAX_EVENTS);
-	if(epoll_fd < 0){
+	if(epoll->epoll_fd < 0){
 		perror("	|! epoll create failed\n");
 		return -2;		
 	}
@@ -65,10 +67,10 @@ int server_epoll_add_object(epoll_t* epoll,event_t* event, server_t* object){
 	}
 	return 0;
 }
-int server_epoll_wait(epoll_t* epoll){
+int server_epoll_wait(epoll_t* epoll,event_t* event){
 	if (epoll == NULL){
 		perror("	|! epoll NULL (epoll_wait) \n");
 		return -1;
 	}
-	return epoll_wait(epoll, EPOLL_TIMEOUT);	
+	return epoll_wait(epoll,event->events_buffer, MAX_EVENTS, EPOLL_TIMEOUT);	
 }

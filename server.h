@@ -20,7 +20,7 @@
 typedef struct server_s server_t;
 struct server_s{
 	int sock;
-	sockaddr_in addr;
+	struct sockaddr_in addr;
 	socklen_t addr_len;
 	
 };
